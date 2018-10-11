@@ -7,7 +7,6 @@ const config = require("./webpack.config.js");
 const compiler = webpack(config);
 
 const server = new webpackDevServer(compiler, {
-    filename: config.output.filename,
     ...config.devServer
 });
 
