@@ -6,8 +6,7 @@ const webpack = require("webpack");
 module.exports = {
     entry: [
         "./src/index.js",
-        'webpack/hot/dev-server',
-        'webpack-dev-server/client?http://localhost:8080/'
+        "webpack-hot-middleware/client",
     ],
     mode: "development",
     output: {
@@ -20,9 +19,27 @@ module.exports = {
             {
                 test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
-                use: {
-                    loader: "babel-loader"
-                }
+                use: [
+                    "babel-loader"
+                ]
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    "style-loader",
+                    {
+                        loader: "css-loader",
+                        options: {
+                            modules: true
+                        }
+                    }
+                ]
+            },
+            {
+                test: /\.(png|svg|jpg|gif)$/,
+                use: [
+                    "file-loader"
+                ]
             }
         ]
     },

@@ -1,8 +1,17 @@
 import React from "react";
+import Heading from "./components/heading/Heading"
+import store from "./store";
+import {Provider} from "react-redux";
+import Content from "./components/content/Content";
 
 const App = () => {
     return (
-        <div>hello</div>
+        <Provider store={store}>
+            <React.Fragment>
+                <Heading/>
+                <Content/>
+            </React.Fragment>
+        </Provider>
     );
 };
 
