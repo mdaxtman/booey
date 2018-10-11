@@ -1,0 +1,7 @@
+.heading {
+    background: rgb(163, 188, 226);
+    display: flex;
+    justify-content: space-evenly;
+    padding: 20px 0;
+
+}
