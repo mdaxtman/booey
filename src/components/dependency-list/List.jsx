@@ -2,21 +2,25 @@ import React from "react";
 import {connect} from "react-redux";
 import ListItem from "./ListItem";
 
-const List = ({localDependencies}) => {
+const List = ({localDependencies, platformDirectoryPath}) => {
     return (
         <div>
             {localDependencies.map((dependencyPath) => (
                 <ListItem
                     key={dependencyPath}
                     dependencyPath={dependencyPath}
+                    platformDirectoryPath={platformDirectoryPath}
                 />
             ))}
         </div>
     );
 };
 
-function mapStateToProps(state) {
-    return {localDependencies: state.localDependencies};
+function mapStateToProps({localDependencies, platformDirectoryPath}) {
+    return {
+        localDependencies,
+        platformDirectoryPath
+    };
 }
 
 export default connect(mapStateToProps)(List);
