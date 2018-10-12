@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./dependency-list.css";
+import classNames from "classnames";
 
 class ListItem extends React.PureComponent {
     constructor(props) {
@@ -30,6 +31,7 @@ class ListItem extends React.PureComponent {
             .catch(() => {
                 this.setState({pending: false});
             });
+            // the below will stream command line output back to the client when complete.
             // .then(body => body.getReader())
             // .then((reader) => {
             //     return new ReadableStream({
@@ -62,8 +64,9 @@ class ListItem extends React.PureComponent {
                 <button
                     onClick={this.handleBuild}
                     disabled={this.state.pending}
+                    className={classNames({[styles.button]: this.state.pending})}
                 >
-                    {this.state.pending ? "pending" : "build & copy"}
+                    {this.state.pending ? "pending" : "build & copy -> build & start"}
                 </button>
                 
             </div>

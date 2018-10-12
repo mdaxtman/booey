@@ -13,6 +13,8 @@ class Heading extends React.PureComponent {
     }
 
     handleFindRepos = () => {
+        this.props.dispatch(updateLocalDependenciesAction([]));
+
         window.fetch("/api/find-nui-dir/" + window.encodeURIComponent(this.props.nuiDirectoryPath))
             .then((response) => {
                 return response.json();
