@@ -1,15 +1,14 @@
 const path = require("path");
 const fs = require("fs");
 const {exec} = require("child_process");
+const {defer, invoke} = require("lodash");
 
 const MOBILE_DEBUG = "/experiences/control-mobile-debug/node_modules/@nui";
 const DESKTOP_DEBUG = "/experiences/control-desktop-debug/node_modules/@nui";
 
 let platformServer;
 function buildAndCopyDependency(src, dest, cb) {
-    if (platformServer && platformServer.kill) {
-        platformServer.kill();
-    }
+    invoke(platformServer, "kill");
 
     build(src)
         .then(findAllInstances.bind(null, src, dest))
@@ -44,6 +43,8 @@ function build(src) {
 function findAllInstances(src, dest) {
     return new Promise((resolve) => {
         const dependencyName = path.basename(src);
+        console.log(`finding all instances of ${dependencyName} in platform`);
+
         const fullMobileDest = path.join(dest, MOBILE_DEBUG);
         const fullDesktopDest = path.join(dest, DESKTOP_DEBUG);
         const destinationDirectories = [];
@@ -102,31 +103,36 @@ function copy (src, destinations) {
 
 function buildPlatform(dest) {
     return new Promise((resolve, reject) => {
-        const build = exec("npm run build", { cwd: dest });
+        invoke(platformServer, "kill");
 
-        build.stdout.on("data", (data) => {
-            console.log(data);
-        });
-        build.on("close", () => {
-            resolve();
-        });
+        defer(() => {
+            const build = exec("npm run build", { cwd: dest });
 
-        build.on("error", () => {
-            reject("failed to build platform");
+            build.stdout.on("data", (data) => {
+                console.log(data);
+            });
+            build.on("close", () => {
+                resolve();
+            });
+
+            build.on("error", () => {
+                reject("failed to build platform");
+            });
         });
     });
 }
 
 function startPlatfrom(dest) {
     return new Promise((resolve, reject) => {
+        console.log("starting server...");
+
         platformServer = exec("node dist --environment=development", {cwd: dest});
-
+        
         platformServer.stdout.on("data", (data) => {
-            if (data.includes("mymwp.dev.nordstrom")) {
-                resolve();
-            }
+            console.log(data);
+            resolve();
         });
-
+        
         platformServer.on("error", (err) => {
             console.log(err);
             reject("failed to build platform");
