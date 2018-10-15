@@ -2,8 +2,6 @@ const fs = require("fs");
 const path = require("path"); 
 const {sortedUniq} = require("lodash");
 
-const DIR = "/Users/bi1w/repos/nui";
-
 function findNuiInDir(dir, cb) {
     const results = [];
     let directoriesToSearch = 1;
@@ -53,5 +51,3 @@ function execCallbackOnComplete(count, cb, results) {
 }
 
 module.exports = findNuiInDir;
-
-findNuiInDir(DIR, (results) => console.log(results));

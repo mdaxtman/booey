@@ -34,8 +34,8 @@ function build(src) {
             resolve();
         });
         
-        build.on("error", (err) => {
-            reject("build failed");
+        build.stderr.on("data", (err) => {
+            reject(err);
         });
     });
 }
@@ -115,8 +115,8 @@ function buildPlatform(dest) {
                 resolve();
             });
 
-            build.on("error", () => {
-                reject("failed to build platform");
+            build.stderr.on("data", (err) => {
+                reject(err);
             });
         });
     });
@@ -133,9 +133,8 @@ function startPlatfrom(dest) {
             resolve();
         });
         
-        platformServer.on("error", (err) => {
-            console.log(err);
-            reject("failed to build platform");
+        platformServer.stderr.on("data", (err) => {
+            reject(err);
         });
     });
 }

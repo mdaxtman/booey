@@ -33,8 +33,7 @@ class Heading extends React.PureComponent {
                 headers: {
                     "content-type": "application/json"
                 }
-            })
-            .then(() => {});
+            });
     }
 
     render() {
@@ -61,7 +60,6 @@ class Heading extends React.PureComponent {
                         value={this.props.platformDirectoryPath}
                     />
                     <button
-                        disabled={true}
                         onClick={this.handleCleanInstall}
                     >
                         clean/install

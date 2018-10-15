@@ -2,7 +2,7 @@ const express = require("express");
 const findNuiInDir = require("./find-nui-in-dir");
 const {get} = require("lodash");
 const buildAndCopyDependency = require("./build-and-copy-dependency");
-
+const cleanAndInstallPlatform = require("./clean-and-install-platform");
 const router = express.Router();
 
 router.get("/find-nui-dir/:directory", (req, res) => {
@@ -26,9 +26,13 @@ router.post("/clean-install-platform", (req, res) => {
         return;
     }
 
+    cleanAndInstallPlatform(req.body.platformPath, (err) => {
+        if (err) {
+            res.status(500).send(err);
+        }
 
-
-    res.send("")
+        res.sendStatus(200);
+    });
 });
 
 router.post("/build-dependency", (req, res) => {
@@ -40,10 +44,10 @@ router.post("/build-dependency", (req, res) => {
 
     buildAndCopyDependency(req.body.dependencyPath, req.body.platformPath, (err) => {
         if (err) {
-            res.status(500).send("ruh-roh");
+            res.status(500).send(err);
         }
 
-        res.send(200);
+        res.sendStatus(200);
     });
 });
 module.exports = router;

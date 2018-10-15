@@ -1,25 +1,44 @@
-const {spawn, execFile} = require("child_process");
+const {exec} = require("child_process");
 const path = require("path");
 
-function cleanAndInstallPlatform(platformPath) {
-    // const chmod = spawn(
-    //     // "ls",
-    //     // "pwd",
-    //     "sudo chmod +x ./clean-install.sh",
-    //     {cwd: path.join(__dirname, "executables")}
-    // );
+function cleanAndInstallPlatform(platformPath, cb) {
+    cleanPlatfrom(platformPath)
+        .then(installPlatform)
+        .then(cb)
+        .catch(err => cb(err));
+}
 
-    // chmod.stdout.on("data", (data) => {
-    //     console.log("" + data);
-    // });
+function cleanPlatfrom(platformPath) {
+    return new Promise((resolve, reject) => {
+        const clean = exec("git checkout . && rm -rf node_modules", {cwd: platformPath});
+        
+        clean.stdout.on("close", () => {
+            resolve(platformPath);
+        });
 
-    execFile(path.resolve(__dirname,"./executables/platform-clean-install.sh"), {cwd: platformPath}, (error, stdout, stderr) => {
-        console.log(error);
-        console.log(stdout);
-        console.log(stderr);
+        clean.stdout.on("err", () => {
+            reject();
+        });
+    });
+}
+
+function installPlatform(platformPath) {
+    return new Promise((resolve, reject) => {
+
+        const install = exec("npm i && ./install", {cwd: platformPath});
+        
+        install.stdout.on("data", (data) => {
+            console.log(data);
+        });
+
+        install.on("close", () => {
+            resolve();
+        });
+        
+        install.on("error", () => {
+            reject();
+        });
     });
 }
 
 module.exports = cleanAndInstallPlatform;
-
-cleanAndInstallPlatform("/Users/bi1w/repos/nui/platform");
