@@ -34,7 +34,7 @@ function build(src) {
             resolve();
         });
         
-        build.stderr.on("data", (err) => {
+        build.on("error", (err) => {
             reject(err);
         });
     });
