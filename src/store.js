@@ -17,8 +17,12 @@ let booeyStore;
 try {
     booeyStore = JSON.parse(localStorage.getItem("booeyStore"));
 } catch(e) {
-
+    
 }
+if (!booeyStore) {
+    booeyStore = rootReducer(undefined, {});
+}
+console.log(booeyStore);
 
 const store = createStore(rootReducer, booeyStore, applyMiddleware(localStorageMiddleware), );
 
