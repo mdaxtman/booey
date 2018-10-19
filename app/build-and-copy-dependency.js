@@ -139,4 +139,9 @@ function startPlatfrom(dest) {
     });
 }
 
+process.on("SIGINT", () => {
+    invoke(platformServer, "kill");
+
+    process.exit();
+});
 module.exports = buildAndCopyDependency;
