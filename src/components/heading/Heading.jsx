@@ -48,7 +48,7 @@ class Heading extends React.PureComponent {
                         value={this.props.nuiDirectoryPath}
                     />
                     <button onClick={this.handleFindRepos}>
-                        find repos
+                        {this.props.haslocalDependencies ? "refresh repos" : "find repos"}
                     </button>
                 </div>
                 <div>
@@ -73,10 +73,11 @@ class Heading extends React.PureComponent {
     } 
 };
 
-function mapStateToProps({nuiDirectoryPath, platformDirectoryPath}) {
+function mapStateToProps({localDependencies, nuiDirectoryPath, platformDirectoryPath}) {
     return {
         nuiDirectoryPath,
-        platformDirectoryPath
+        platformDirectoryPath,
+        haslocalDependencies: !!(localDependencies || []).length
     };
 }
 export default connect(mapStateToProps)(Heading);

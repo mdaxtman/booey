@@ -1,12 +1,14 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
+const webpack = require("webpack");
 
 module.exports = {
     entry: [
         "./src/index.js",
+        "webpack-hot-middleware/client",
     ],
-    mode: "production",
+    mode: "development",
     output: {
         filename: "main.js",
         path: path.join(__dirname, 'dist'),
@@ -47,8 +49,14 @@ module.exports = {
             template: "index.html",
             inject: "body"
         }),
-        new CleanWebpackPlugin(["dist"]),
+        new webpack.HotModuleReplacementPlugin(),
     ],
+    devServer: {
+        contentBase: "src",
+        hot: true,
+        open: true
+    },
+    devtool: "source-map",
     resolve: {
         extensions: [".webpack.js", ".web.js", ".js", ".jsx"]
     },
