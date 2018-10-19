@@ -144,4 +144,5 @@ process.on("SIGINT", () => {
 
     process.exit();
 });
+
 module.exports = buildAndCopyDependency;
