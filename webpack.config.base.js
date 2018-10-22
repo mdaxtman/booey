@@ -1,12 +1,10 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const CleanWebpackPlugin = require("clean-webpack-plugin");
 
 module.exports = {
     entry: [
         "./src/index.js",
     ],
-    mode: "production",
     output: {
         filename: "main.js",
         path: path.join(__dirname, 'dist'),
@@ -43,11 +41,10 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            title: "Booey - Better than NUI",
+            title: "Booey - Builder For NUI",
             template: "index.html",
             inject: "body"
-        }),
-        new CleanWebpackPlugin(["dist"]),
+        })
     ],
     resolve: {
         extensions: [".webpack.js", ".web.js", ".js", ".jsx"]
