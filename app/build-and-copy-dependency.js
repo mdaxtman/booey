@@ -95,7 +95,7 @@ function copy(src, destinationDirectories, send) {
                 src = fullDesktopSrc
             }
 
-            send(`copying ${src} to ${destination}\n`);
+            send(`copying ${src} to ${destination}`);
 
             exec(`rsync --archive --progress --quiet --exclude=node_modules ${src}/* ${destination}`);
         });
