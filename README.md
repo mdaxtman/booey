@@ -34,3 +34,6 @@
 
 ### Running Tests
 1. Run `npm run test`
+
+### Running the Dev Server
+1. Run `npm run dev`
