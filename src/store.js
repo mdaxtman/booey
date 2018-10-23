@@ -1,6 +1,6 @@
 import {createStore, applyMiddleware} from "redux";
 import rootReducer from "./reducers";
-import {defer} from "lodash";
+import {defer, omit} from "lodash";
 
 const localStorageMiddleware = store => next => action => {
     console.log(action);
@@ -22,8 +22,7 @@ try {
 if (!booeyStore) {
     booeyStore = rootReducer(undefined, {});
 }
-console.log(booeyStore);
 
-const store = createStore(rootReducer, booeyStore, applyMiddleware(localStorageMiddleware), );
+const store = createStore(rootReducer, omit(booeyStore, "stdOut"), applyMiddleware(localStorageMiddleware), );
 
 export default store;

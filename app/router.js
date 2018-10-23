@@ -1,9 +1,11 @@
 const express = require("express");
 const findNuiInDir = require("./find-nui-in-dir");
-const {get, union, sort, sortedUniq} = require("lodash");
+const {get, union, sortedUniq} = require("lodash");
 const buildAndCopyDependency = require("./build-and-copy-dependency");
 const cleanAndInstallPlatform = require("./clean-and-install-platform");
 const router = express.Router();
+
+require('express-ws')(router);
 
 router.get("/find-nui-dir/:directories", (req, res) => {
 
@@ -20,10 +22,6 @@ router.get("/find-nui-dir/:directories", (req, res) => {
         .then(sortedUniq)
         .then((results) => {
             res.send(JSON.stringify(results));
-<<<<<<< HEAD
-=======
-            console.log(results);
->>>>>>> 48a7f6bf9d3463eaa5d41d53f3cf130a398e5b6e
         })
         .catch((err) => {
             res.status(500).send(err);
@@ -47,20 +45,45 @@ router.post("/clean-install-platform", (req, res) => {
     });
 });
 
-router.post("/build-dependency", (req, res) => {
-    if (!(get(req, "body.platformPath") || !get(req, "body.dependencyPath"))) {
-        res.status(400).send("you must provide both dependency and platform directories");
-        
-        return;
-    }
+router.ws("/build-dependency", (ws, req) => {
+    ws.on("message", (msg) => {
+        let message;
 
-    buildAndCopyDependency(req.body.dependencyPath, req.body.platformPath, (err) => {
-        if (err) {
-            res.status(500).send(err);
+        try {
+            message = JSON.parse(msg);
+        } catch (err) {
+            return ws.close(1007);
         }
 
-        res.sendStatus(200);
+        if (!message || !message.dependencyPath || !message.platformPath) {
+           return ws.close(1007);
+        }
+        
+        buildAndCopyDependency(
+            message.dependencyPath,
+            message.platformPath,
+            ws.send.bind(ws)
+        ).then(() => {
+            ws.send("platform server started");
+            ws.close(1000);
+        }).catch((err) => {
+            console.log(err);
+            ws.close(1011);
+        });
     });
+    // if (!(get(req, "body.platformPath") || !get(req, "body.dependencyPath"))) {
+    //     res.status(400).send("you must provide both dependency and platform directories");
+        
+    //     return;
+    // }
+
+    // buildAndCopyDependency(req.body.dependencyPath, req.body.platformPath, (err) => {
+    //     if (err) {
+    //         res.status(500).send(err);
+    //     }
+
+    //     res.sendStatus(200);
+    // });
 });
 
 module.exports = router;

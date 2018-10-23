@@ -24,3 +24,12 @@ export function updatePlatformDirectoryPathAction(pathString) {
         payload: pathString
     }
 }
+
+export const UPDATE_STDOUT_HISTORY = "UPDATE_STDOUT_HISTORY";
+
+export function updateStdOutHistory(str) {
+    return {
+        type: UPDATE_STDOUT_HISTORY,
+        payload: str
+    }
+}

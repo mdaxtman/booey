@@ -7,27 +7,25 @@ const MOBILE_DEBUG = "/experiences/control-mobile-debug/node_modules/@nui";
 const DESKTOP_DEBUG = "/experiences/control-desktop-debug/node_modules/@nui";
 
 let platformServer;
-function buildAndCopyDependency(src, dest, cb) {
+function buildAndCopyDependency(src, dest, send) {
     invoke(platformServer, "kill");
 
-    build(src)
-        .then(findAllInstances.bind(null, src, dest))
-        .then(copy.bind(null, src))
-        .then(buildPlatform.bind(null, dest))
-        .then(startPlatfrom.bind(null, dest))
-        .then(cb)
-        .catch((err) => {
-            cb(err);
-        });
+    return build(src, send)
+        .then(findAllInstances.bind(null, src, dest, send))
+        .then((destinationDirectories) => (
+            copy(src, destinationDirectories, send)
+        ))
+        .then(buildPlatform.bind(null, dest, send))
+        .then(startPlatfrom.bind(null, dest, send));
 }
 
-function build(src) {
+function build(src, send) {
     return new Promise((resolve, reject) => {
 
         const build = exec("rm -rf .nui && nui build", { cwd: src });
 
         build.stdout.on("data", (data) => {
-            console.log(data);
+            send(data);
         });
         
         build.on("close", () => {            
@@ -40,10 +38,10 @@ function build(src) {
     });
 }
 
-function findAllInstances(src, dest) {
+function findAllInstances(src, dest, send) {
     return new Promise((resolve) => {
         const dependencyName = path.basename(src);
-        console.log(`finding all instances of ${dependencyName} in platform`);
+        send(`finding all instances of ${dependencyName} in platform`);
 
         const fullMobileDest = path.join(dest, MOBILE_DEBUG);
         const fullDesktopDest = path.join(dest, DESKTOP_DEBUG);
@@ -57,7 +55,7 @@ function findAllInstances(src, dest) {
             } catch(e) {
                 return;
             }
-    
+
             directories.forEach((dirName) => {
                 if (dirName === dependencyName) {
                     destinationDirectories.push(path.join(dir, dependencyName));
@@ -73,17 +71,17 @@ function findAllInstances(src, dest) {
         recurse(fullDesktopDest);
 
         resolve(destinationDirectories);
-    });
+    })
 
 }
 
-function copy (src, destinations) {
+function copy(src, destinationDirectories, send) {
     return new Promise((resolve) => {
         const transformsParent = fs.readdirSync(path.join(src, "/.nui"))[0];
         const fullMobileSrc = path.join(src, "/.nui", transformsParent, "/transforms/mobile-es6-debug");
         const fullDesktopSrc = path.join(src, "/.nui", transformsParent, "/transforms/desktop-es6-debug");
 
-        destinations.forEach((destination) => {
+        destinationDirectories.forEach((destination) => {
             let src;
 
             if (destination.includes("mobile")) {
@@ -92,7 +90,7 @@ function copy (src, destinations) {
                 src = fullDesktopSrc
             }
 
-            console.log(`copying ${src} to ${destination}`);
+            send(`copying ${src} to ${destination}`);
 
             exec(`rsync --archive --progress --quiet --exclude=node_modules ${src}/* ${destination}`);
         });
@@ -101,7 +99,7 @@ function copy (src, destinations) {
     });
 }
 
-function buildPlatform(dest) {
+function buildPlatform(dest, send) {
     return new Promise((resolve, reject) => {
         invoke(platformServer, "kill");
 
@@ -109,8 +107,9 @@ function buildPlatform(dest) {
             const build = exec("npm run build", { cwd: dest });
 
             build.stdout.on("data", (data) => {
-                console.log(data);
+                send(data);
             });
+
             build.on("close", () => {
                 resolve();
             });
@@ -122,14 +121,13 @@ function buildPlatform(dest) {
     });
 }
 
-function startPlatfrom(dest) {
+function startPlatfrom(dest, send) {
     return new Promise((resolve, reject) => {
-        console.log("starting server...");
+        send("starting server...");
 
         platformServer = exec("node dist --environment=development", {cwd: dest});
-        
-        platformServer.stdout.on("data", (data) => {
-            console.log(data);
+
+        platformServer.stdout.on("data", () => {
             resolve();
         });
         
@@ -139,10 +137,11 @@ function startPlatfrom(dest) {
     });
 }
 
+// ensures that if platform server is running when express exits, to kill it.
 process.on("SIGINT", () => {
     invoke(platformServer, "kill");
 
-    process.exit();
+    process.exit(0);
 });
 
 module.exports = buildAndCopyDependency;

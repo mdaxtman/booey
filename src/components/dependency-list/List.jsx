@@ -2,9 +2,9 @@ import React from "react";
 import {connect} from "react-redux";
 import ListItem from "./ListItem";
 
-const List = ({localDependencies, platformDirectoryPath}) => {
+const List = ({localDependencies, platformDirectoryPath, className}) => {
     return (
-        <div>
+        <div className={className}>
             {localDependencies.map((dependencyPath) => (
                 <ListItem
                     key={dependencyPath}

@@ -26,13 +26,25 @@ function platformDirectoryPathReducer (state = "", action) {
     return state;
 }
 
+function stdOutReducer(state = [], action) {
+    if (action.type === actions.UPDATE_STDOUT_HISTORY) {
+        if (state.length >= 100) {
+            return state.slice(1).concat([action.payload]);
+        } 
+        return state.concat([action.payload]);
+    }
+
+    return state;
+}
+
 
 
 
 const rootReducer = combineReducers({
     localDependencies: localDependenciesReducer,
     nuiDirectoryPath: nuiDirectoryPathReducer,
-    platformDirectoryPath: platformDirectoryPathReducer
+    platformDirectoryPath: platformDirectoryPathReducer,
+    stdOut: stdOutReducer
 });
 
 export default rootReducer;
