@@ -1,6 +1,6 @@
-#Booey
+# Booey
 
-##Quick Start
+## Quick Start
 
 1. Clone down the Booey Repo and `cd booey`
 2. Run `npm install`
@@ -8,7 +8,7 @@
 4. Run `npm run start`
 5. Booey runs locally on port 3131. The UI should open a new tab or you can navigate to localhost:3131 in your browser.
 
-##Using Booey
+## Using Booey
 1. Add your nui repos to Booey by entering in the absolute path to the repos into the "nui repos directory" input. You can either add a single repo or multiple:
 
     * **Single Repo** - You can add a path to a single repo:       
@@ -30,7 +30,7 @@
 3. Now that you have added your nui repos and the platform repo, you can copy your local code over to the platform by clicking "build & copy -> build & start" next to on of your repos OR select multiple repos and click the "Build & Copy selected" button above your list of repos. You'll be able to see the commands running in the terminal on the right of your page or in your terminal locally.
 
 
-##Contributing to Booey
+## Contributing to Booey
 
-###Running Tests
+### Running Tests
 1. Run `npm run test`
