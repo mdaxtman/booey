@@ -20,6 +20,10 @@ router.get("/find-nui-dir/:directories", (req, res) => {
         .then(sortedUniq)
         .then((results) => {
             res.send(JSON.stringify(results));
+<<<<<<< HEAD
+=======
+            console.log(results);
+>>>>>>> 48a7f6bf9d3463eaa5d41d53f3cf130a398e5b6e
         })
         .catch((err) => {
             res.status(500).send(err);
