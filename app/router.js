@@ -1,21 +1,29 @@
 const express = require("express");
 const findNuiInDir = require("./find-nui-in-dir");
-const {get} = require("lodash");
+const {get, union, sort, sortedUniq} = require("lodash");
 const buildAndCopyDependency = require("./build-and-copy-dependency");
 const cleanAndInstallPlatform = require("./clean-and-install-platform");
 const router = express.Router();
 
-router.get("/find-nui-dir/:directory", (req, res) => {
+router.get("/find-nui-dir/:directories", (req, res) => {
 
-    if (!get(req, "params.directory")) {
+    if (!get(req, "params.directories")) {
         res.status(400).send("you need to provide a directory");
 
         return;
     }
 
-    findNuiInDir(req.params.directory, (results) => {
-        res.send(JSON.stringify(results));
-    });
+    const directories = req.params.directories.replace(/;\s/g, ";").split(";");
+
+    Promise.all(directories.map((d) => findNuiInDir(d)))
+        .then((repos) => union(...repos))
+        .then(sortedUniq)
+        .then((results) => {
+            res.send(JSON.stringify(results));
+        })
+        .catch((err) => {
+            res.status(500).send(err);
+        });
 
 });
 
