@@ -16,7 +16,12 @@ function buildAndCopyDependency(src, dest, send) {
             copy(src, destinationDirectories, send)
         ))
         .then(buildPlatform.bind(null, dest, send))
-        .then(startPlatfrom.bind(null, dest, send));
+        .then(startPlatfrom.bind(null, dest, send))
+        .catch((err) => {
+            invoke(platformServer, "kill");
+
+            throw err
+        });
 }
 
 function build(src, send) {
@@ -90,7 +95,7 @@ function copy(src, destinationDirectories, send) {
                 src = fullDesktopSrc
             }
 
-            send(`copying ${src} to ${destination}`);
+            send(`copying ${src} to ${destination}\n`);
 
             exec(`rsync --archive --progress --quiet --exclude=node_modules ${src}/* ${destination}`);
         });

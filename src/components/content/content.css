@@ -13,8 +13,12 @@
 }
 
 .output {
+    padding: 5px;
+    font-family: helvetica;
     background: rgb(34, 32, 32);
     color: rgb(233, 227, 227);
     height: 600px;
-    overflow: scroll;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    overflow-wrap: normal;
 }

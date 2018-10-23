@@ -68,6 +68,7 @@ router.ws("/build-dependency", (ws, req) => {
             ws.close(1000);
         }).catch((err) => {
             console.log(err);
+            ws.send("internal error, exiting");
             ws.close(1011);
         });
     });
