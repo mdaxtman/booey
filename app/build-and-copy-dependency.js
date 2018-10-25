@@ -3,8 +3,32 @@ const fs = require("fs");
 const {exec} = require("child_process");
 const {defer, invoke} = require("lodash");
 
-const MOBILE_DEBUG = "/experiences/control-mobile-debug/node_modules/@nui";
-const DESKTOP_DEBUG = "/experiences/control-desktop-debug/node_modules/@nui";
+function platformPathTemplate(directory) {
+    return `/experiences/${directory}/node_modules/@nui`
+}
+
+// Note: the indexes of these arrays are important. These items cannot be re-arranged
+// unless you re-arange both
+const SRC_DIRECTORIES = [
+    "mobile-es6-debug",
+    "desktop-es6-debug",
+    "desktop-es5-debug",
+    "mobile-es5-debug",
+    "desktop-es6-production",
+    "desktop-es5-production",
+    "mobile-es6-production",
+    "mobile-es5-production"
+];
+const PLATFORM_PATHS = [
+    platformPathTemplate`control-mobile-debug`,
+    platformPathTemplate`control-desktop-debug`,
+    platformPathTemplate`control-desktop-debug-es5`,
+    platformPathTemplate`control-mobile-debug-es5`,
+    platformPathTemplate`control-desktop-production`,
+    platformPathTemplate`control-desktop-production-es5`,
+    platformPathTemplate`control-mobile-production`,
+    platformPathTemplate`control-mobile-production-es5`
+];
 
 let platformServer;
 function buildAndCopyDependency(src, dest, send) {
@@ -48,11 +72,9 @@ function findAllInstances(src, dest, send) {
         const dependencyName = path.basename(src);
         send(`finding all instances of ${dependencyName} in platform`);
 
-        const fullMobileDest = path.join(dest, MOBILE_DEBUG);
-        const fullDesktopDest = path.join(dest, DESKTOP_DEBUG);
         const destinationDirectories = [];
 
-        function recurse(dir) {
+        function recurse(dir, i) {
             let directories;
 
             try {
@@ -63,7 +85,11 @@ function findAllInstances(src, dest, send) {
 
             directories.forEach((dirName) => {
                 if (dirName === dependencyName) {
-                    destinationDirectories.push(path.join(dir, dependencyName));
+                    if (!destinationDirectories[i]) {
+                        destinationDirectories[i] = [];
+                    }
+
+                    destinationDirectories[i].push(path.join(dir, dependencyName));
 
                     return;
                 }
@@ -71,9 +97,10 @@ function findAllInstances(src, dest, send) {
                 recurse(path.join(dir, dirName, "/node_modules/@nui"));
             });    
         }
-    
-        recurse(fullMobileDest);
-        recurse(fullDesktopDest);
+        
+        PLATFORM_PATHS.forEach((platformPath, i) => {
+            recurse(path.join(dest, platformPath), i);
+        });
 
         resolve(destinationDirectories);
     })
@@ -81,23 +108,16 @@ function findAllInstances(src, dest, send) {
 }
 
 function copy(src, destinationDirectories, send) {
+
     return new Promise((resolve) => {
         const transformsParent = fs.readdirSync(path.join(src, "/.nui"))[0];
-        const fullMobileSrc = path.join(src, "/.nui", transformsParent, "/transforms/mobile-es6-debug");
-        const fullDesktopSrc = path.join(src, "/.nui", transformsParent, "/transforms/desktop-es6-debug");
 
-        destinationDirectories.forEach((destination) => {
-            let src;
+        destinationDirectories.forEach((destination, i) => {
+            const sourceDirectory = path.join(src, "/.nui", transformsParent, "/transforms", SRC_DIRECTORIES[i]);
 
-            if (destination.includes("mobile")) {
-                src = fullMobileSrc;
-            } else {
-                src = fullDesktopSrc
-            }
+            send(`copying ${sourceDirectory} to ${destination}`);
 
-            send(`copying ${src} to ${destination}`);
-
-            exec(`rsync --archive --progress --quiet --exclude=node_modules ${src}/* ${destination}`);
+            exec(`rsync --archive --progress --quiet --exclude=node_modules ${sourceDirectory}/* ${destination}`);
         });
 
         resolve();
