@@ -23,6 +23,6 @@ if (!booeyStore) {
     booeyStore = rootReducer(undefined, {});
 }
 
-const store = createStore(rootReducer, omit(booeyStore, "stdOut"), applyMiddleware(localStorageMiddleware), );
+const store = createStore(rootReducer, omit(booeyStore, "stdOut"), applyMiddleware(localStorageMiddleware));
 
 export default store;
