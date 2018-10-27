@@ -3,6 +3,8 @@ import styles from "./dependency-list.css";
 import classNames from "classnames";
 import {connect} from "react-redux";
 import {updateStdOutHistory} from "../../actions";
+import WS from "../../controllers/websockets";
+
 class ListItem extends React.PureComponent {
     constructor(props) {
         super(props);
@@ -13,44 +15,19 @@ class ListItem extends React.PureComponent {
     }
     handleBuild = () => {
         this.setState({pending: true});
-
-        const ws = new WebSocket(
-            `ws://${window.location.host}/api/build-dependency`
-        );
-
-        ws.onopen = () => ws.send(
-            JSON.stringify({
+        
+        const ws = new WS("/api/build-dependency", {
+            onopen:() => ws.send({
                 dependencyPath: this.props.dependencyPath,
                 platformPath: this.props.platformDirectoryPath
-            })
-        );
-
-        ws.onmessage = ({data}) => {
-            this.props.dispatch(updateStdOutHistory(data));
-        };
-
-        ws.onclose = () => {
-            this.setState({pending: false})
-        };
-
-        // window.fetch(
-        //     "/api/build-dependency",
-        //     {
-        //         method: "POST",
-        //         body: JSON.stringify({
-        //             dependencyPath: this.props.dependencyPath,
-        //             platformPath: this.props.platformDirectoryPath
-        //         }),
-        //         headers: {
-        //             "content-type": "application/json"
-        //         }
-        //     })
-        //     .then(() => {
-        //         this.setState({pending: false});
-        //     })
-        //     .catch(() => {
-        //         this.setState({pending: false});
-        //     });
+            }),
+            onmessage:({data}) => {
+                this.props.dispatch(updateStdOutHistory(data));
+            },
+            onclose: () => {
+                this.setState({ pending: false })
+            }
+        });
     }
 
     render() {
