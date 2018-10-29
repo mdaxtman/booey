@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./dependency-list.css";
 import classNames from "classnames";
 import {connect} from "react-redux";
-import {updateStdOutHistory} from "../../actions";
+import {updateStdOutHistoryAction} from "../../actions";
 import WS from "../../controllers/websockets";
 
 class ListItem extends React.PureComponent {
@@ -22,7 +22,7 @@ class ListItem extends React.PureComponent {
                 platformPath: this.props.platformDirectoryPath
             }),
             onmessage:({data}) => {
-                this.props.dispatch(updateStdOutHistory(data));
+                this.props.dispatch(updateStdOutHistoryAction(data));
             },
             onclose: () => {
                 this.setState({ pending: false })

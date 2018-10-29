@@ -9,6 +9,6 @@ export default class WS {
     }
 
     send(message) {
-        this.wsInstance.send(JSON.stringify(message));
+        this.wsInstance.send(typeof message === string ? message : JSON.stringify(message));
     }
 }
