@@ -3,7 +3,6 @@ const router = require("./app/router");
 const bodyParser = require("body-parser");
 const app = express();
 const {exec} = require("child_process");
-const expressWs = require('express-ws')(app);
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
