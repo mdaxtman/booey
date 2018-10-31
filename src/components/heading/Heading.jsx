@@ -2,6 +2,8 @@ import React from "react";
 import styles from "./heading.css";
 import {connect} from "react-redux";
 import {updateLocalDependenciesAction, updateNuiDirectoryPathAction, updatePlatformDirectoryPathAction} from "../../actions"
+import ServerStatus from "./ServerStatus.jsx";
+
 
 class Heading extends React.PureComponent {
     handleNuiDirectoryChange = ({target: {value}}) => {
@@ -64,9 +66,10 @@ class Heading extends React.PureComponent {
                     >
                         clean/install
                     </button>
-                    <button>
+                    <button disabled>
                         build/start
                     </button>
+                    <ServerStatus />
                 </div>
             </div>
         );

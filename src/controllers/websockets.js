@@ -1,6 +1,6 @@
 export default class WS {
     wsInstance
-    constructor(route, {onopen, onmessage, onclose}) {
+    constructor(route, {onopen, onmessage, onclose} = {}) {
         this.wsInstance = new WebSocket(`ws://${window.location.host}${route}`);
 
         this.wsInstance.onopen = onopen;
@@ -9,6 +9,6 @@ export default class WS {
     }
 
     send(message) {
-        this.wsInstance.send(typeof message === string ? message : JSON.stringify(message));
+        this.wsInstance.send(typeof message === "string" ? message : JSON.stringify(message));
     }
 }

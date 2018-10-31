@@ -4,6 +4,7 @@ const {get, union, sortedUniq} = require("lodash");
 const buildAndCopyDependency = require("./build-and-copy-dependency");
 const cleanAndInstallPlatform = require("./clean-and-install-platform");
 const router = express.Router();
+const {serverEvents, platformServer} = require("./controllers/platform-server");
 
 require('express-ws')(router);
 
@@ -45,7 +46,7 @@ router.post("/clean-install-platform", (req, res) => {
     });
 });
 
-router.ws("/build-dependency", (ws, req) => {
+router.ws("/build-dependency", (ws) => {
     ws.on("message", (msg) => {
         let message;
 
@@ -72,19 +73,28 @@ router.ws("/build-dependency", (ws, req) => {
             ws.close(1011);
         });
     });
-    // if (!(get(req, "body.platformPath") || !get(req, "body.dependencyPath"))) {
-    //     res.status(400).send("you must provide both dependency and platform directories");
-        
-    //     return;
-    // }
+});
 
-    // buildAndCopyDependency(req.body.dependencyPath, req.body.platformPath, (err) => {
-    //     if (err) {
-    //         res.status(500).send(err);
-    //     }
+router.ws("/server-status", (ws) => {
+    serverEvents.on("on", () => {
+        ws.send("on");
+    });
 
-    //     res.sendStatus(200);
-    // });
+    serverEvents.on("off", () => {
+        ws.send("off");
+    });
+
+    ws.on("message", (msg) => {
+        const {type, payload} = JSON.parse(msg);
+
+        if (type === "start" && payload) {
+            platformServer.startServer(payload);
+        }
+
+        if (type === "stop") {
+            platformServer.killServer();
+        }
+    });
 });
 
 module.exports = router;

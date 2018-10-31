@@ -1,7 +1,8 @@
 const path = require("path");
 const fs = require("fs");
 const {exec} = require("child_process");
-const {defer, invoke} = require("lodash");
+const {defer} = require("lodash");
+const {platformServer} = require("./controllers/platform-server");
 
 function platformPathTemplate(directory) {
     return `/experiences/${directory}/node_modules/@nui`
@@ -30,38 +31,34 @@ const PLATFORM_PATHS = [
     platformPathTemplate`control-mobile-production-es5`
 ];
 
-let platformServer;
 function buildAndCopyDependency(src, dest, send) {
-    invoke(platformServer, "kill");
-
     return build(src, send)
         .then(findAllInstances.bind(null, src, dest, send))
         .then((destinationDirectories) => (
             copy(src, destinationDirectories, send)
         ))
         .then(buildPlatform.bind(null, dest, send))
-        .then(startPlatfrom.bind(null, dest, send))
+        .then(startPlatform.bind(null, dest, send))
         .catch((err) => {
-            invoke(platformServer, "kill");
-
+            platformServer.killServer();
             throw err
         });
 }
 
 function build(src, send) {
     return new Promise((resolve, reject) => {
-
         const build = exec("rm -rf .nui && nui build", { cwd: src });
 
         build.stdout.on("data", (data) => {
             send(data);
         });
         
-        build.on("close", () => {            
+        build.on("close", () => {         
             resolve();
         });
         
         build.on("error", (err) => {
+            console.log(err);
             reject(err);
         });
     });
@@ -126,8 +123,6 @@ function copy(src, destinationDirectories, send) {
 
 function buildPlatform(dest, send) {
     return new Promise((resolve, reject) => {
-        invoke(platformServer, "kill");
-
         defer(() => {
             const build = exec("npm run build", { cwd: dest });
 
@@ -146,27 +141,13 @@ function buildPlatform(dest, send) {
     });
 }
 
-function startPlatfrom(dest, send) {
-    return new Promise((resolve, reject) => {
+function startPlatform(dest, send) {
+    return new Promise((resolve) => {
         send("starting server...");
 
-        platformServer = exec("node dist --environment=development", {cwd: dest});
-
-        platformServer.stdout.on("data", () => {
-            resolve();
-        });
-        
-        platformServer.stderr.on("data", (err) => {
-            reject(err);
-        });
+        platformServer.startServer(dest);
+        resolve();
     });
 }
-
-// ensures that if platform server is running when express exits, to kill it.
-process.on("SIGINT", () => {
-    invoke(platformServer, "kill");
-
-    process.exit(0);
-});
 
 module.exports = buildAndCopyDependency;

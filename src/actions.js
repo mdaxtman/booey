@@ -27,7 +27,7 @@ export function updatePlatformDirectoryPathAction(pathString) {
 
 export const UPDATE_STDOUT_HISTORY = "UPDATE_STDOUT_HISTORY";
 
-export function updateStdOutHistory(str) {
+export function updateStdOutHistoryAction(str) {
     return {
         type: UPDATE_STDOUT_HISTORY,
         payload: str
