@@ -4,6 +4,7 @@ const {get, union, sortedUniq} = require("lodash");
 const buildAndCopyDependency = require("./build-and-copy-dependency");
 const cleanAndInstallPlatform = require("./clean-and-install-platform");
 const router = express.Router();
+const {serverEvents, platformServer} = require("./controllers/platform-server");
 
 require('express-ws')(router);
 
@@ -45,7 +46,7 @@ router.post("/clean-install-platform", (req, res) => {
     });
 });
 
-router.ws("/build-dependency", (ws, req) => {
+router.ws("/build-dependency", (ws) => {
     ws.on("message", (msg) => {
         let message;
 
@@ -64,7 +65,6 @@ router.ws("/build-dependency", (ws, req) => {
             message.platformPath,
             ws.send.bind(ws)
         ).then(() => {
-            ws.send("platform server started");
             ws.close(1000);
         }).catch((err) => {
             console.log(err);
@@ -72,19 +72,44 @@ router.ws("/build-dependency", (ws, req) => {
             ws.close(1011);
         });
     });
-    // if (!(get(req, "body.platformPath") || !get(req, "body.dependencyPath"))) {
-    //     res.status(400).send("you must provide both dependency and platform directories");
-        
-    //     return;
-    // }
+});
 
-    // buildAndCopyDependency(req.body.dependencyPath, req.body.platformPath, (err) => {
-    //     if (err) {
-    //         res.status(500).send(err);
-    //     }
+router.ws("/server-status", (ws) => {
+    serverEvents.on("on", () => {
+        if (ws.readyState !== 1) {
+            return;
+        }
 
-    //     res.sendStatus(200);
-    // });
+        ws.send("on");
+    });
+
+    serverEvents.on("off", () => {
+        if (ws.readyState !== 1) {
+            return;
+        }
+
+        ws.send("off");
+    });
+
+    ws.on("message", (msg) => {
+        if (ws.readyState !== 1) {
+            return;
+        }
+
+        const {type, payload} = JSON.parse(msg);
+
+        if (type === "start" && payload) {
+            platformServer.startServer(payload);
+        }
+
+        if (type === "stop") {
+            platformServer.killServer();
+        }
+    });
+
+    ws.on("close", () => {
+        platformServer.killServer();
+    });
 });
 
 module.exports = router;
