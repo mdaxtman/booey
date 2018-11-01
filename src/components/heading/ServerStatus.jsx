@@ -3,6 +3,7 @@ import classNames from "classnames";
 import React, {Component} from "react";
 import styles from "./server-status.css";
 import WS from "../../controllers/websockets";
+import {updateStdOutHistoryAction} from "../../actions";
 
 class ServerStatus extends Component {
     constructor(props) {
@@ -44,7 +45,22 @@ class ServerStatus extends Component {
         return null;
     }
 
+    componentDidUpdate(prevProps, prevState) {
+        let msg = "";
+
+        if (prevState.serverRunning && !this.state.serverRunning) {
+            msg = "platform server stopped";
+        } else if (!prevState.serverRunning && this.state.serverRunning) {
+            msg = "platform server started";
+        }
+
+        if (msg) {
+            this.props.dispatch(updateStdOutHistoryAction(msg));
+        }
+    }
+
     handleStart = () => {
+        this.props.dispatch(updateStdOutHistoryAction("starting server..."));
         this.ws.send({
             type: "start",
             payload: this.props.platformDirectoryPath
