@@ -77,14 +77,26 @@ router.ws("/build-dependency", (ws) => {
 
 router.ws("/server-status", (ws) => {
     serverEvents.on("on", () => {
+        if (ws.readyState !== 1) {
+            return;
+        }
+
         ws.send("on");
     });
 
     serverEvents.on("off", () => {
+        if (ws.readyState !== 1) {
+            return;
+        }
+
         ws.send("off");
     });
 
     ws.on("message", (msg) => {
+        if (ws.readyState !== 1) {
+            return;
+        }
+
         const {type, payload} = JSON.parse(msg);
 
         if (type === "start" && payload) {
@@ -94,6 +106,10 @@ router.ws("/server-status", (ws) => {
         if (type === "stop") {
             platformServer.killServer();
         }
+    });
+
+    ws.on("close", () => {
+        platformServer.killServer();
     });
 });
 
