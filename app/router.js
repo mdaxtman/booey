@@ -65,7 +65,6 @@ router.ws("/build-dependency", (ws) => {
             message.platformPath,
             ws.send.bind(ws)
         ).then(() => {
-            ws.send("platform server started");
             ws.close(1000);
         }).catch((err) => {
             console.log(err);
