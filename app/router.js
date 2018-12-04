@@ -77,6 +77,7 @@ router.ws("/build-dependency", (ws) => {
 router.ws("/server-status", (ws) => {
     serverEvents.removeAllListeners("on");
     serverEvents.removeAllListeners("off");
+    serverEvents.removeAllListeners("errMessage");
 
     serverEvents.on("on", () => {
         if (ws.readyState !== 1) {
@@ -92,6 +93,10 @@ router.ws("/server-status", (ws) => {
         }
 
         ws.send("off");
+    });
+
+    serverEvents.on("errMessage", (err) => {
+        ws.send(err);
     });
 
     ws.on("message", (msg) => {
