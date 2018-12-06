@@ -16,12 +16,14 @@ class ServerStatus extends Component {
         this.ws = new WS("/api/server-status", {
             onmessage: (msg) => {
                 if (msg.data === "on") {
-                    this.setState({serverRunning: true});
+                    return this.setState({serverRunning: true});
                 }
 
                 if (msg.data === "off") {
-                    this.setState({serverRunning: false});
+                    return this.setState({serverRunning: false});
                 }
+
+                this.props.dispatch(updateStdOutHistoryAction(msg.data));
             },
             onopen: () => {
                 if (props.platformDirectoryPath) {

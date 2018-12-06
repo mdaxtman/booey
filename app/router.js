@@ -3,9 +3,9 @@ const findNuiInDir = require("./find-nui-in-dir");
 const {get, union, sortedUniq} = require("lodash");
 const buildAndCopyDependency = require("./build-and-copy-dependency");
 const cleanAndInstallPlatform = require("./clean-and-install-platform");
-const router = express.Router();
 const {serverEvents, platformServer} = require("./controllers/platform-server");
 
+const router = express.Router();
 require('express-ws')(router);
 
 router.get("/find-nui-dir/:directories", (req, res) => {
@@ -75,6 +75,10 @@ router.ws("/build-dependency", (ws) => {
 });
 
 router.ws("/server-status", (ws) => {
+    serverEvents.removeAllListeners("on");
+    serverEvents.removeAllListeners("off");
+    serverEvents.removeAllListeners("errMessage");
+
     serverEvents.on("on", () => {
         if (ws.readyState !== 1) {
             return;
@@ -89,6 +93,10 @@ router.ws("/server-status", (ws) => {
         }
 
         ws.send("off");
+    });
+
+    serverEvents.on("errMessage", (err) => {
+        ws.send(err);
     });
 
     ws.on("message", (msg) => {

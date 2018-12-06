@@ -13,18 +13,24 @@ class ListItem extends React.PureComponent {
             pending: false
         };
     }
+
     handleBuild = () => {
         this.setState({pending: true});
         
         const ws = new WS("/api/build-dependency", {
-            onopen:() => ws.send({
-                dependencyPath: this.props.dependencyPath,
-                platformPath: this.props.platformDirectoryPath
-            }),
+            onopen:() => {
+                document.title = "Pending..."
+
+                ws.send({
+                    dependencyPath: this.props.dependencyPath,
+                    platformPath: this.props.platformDirectoryPath
+                });
+            },
             onmessage:({data}) => {
                 this.props.dispatch(updateStdOutHistoryAction(data));
             },
             onclose: () => {
+                document.title = "Booey - Done!"
                 this.setState({ pending: false })
             }
         });

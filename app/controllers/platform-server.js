@@ -10,7 +10,11 @@ class PlatformServer {
 
         this.platformServer = exec("node dist --environment=development", { cwd: dest });
 
-        this.platformServer.stdout.on("data", () => {
+        this.platformServer.stdout.on("data", (data) => {
+            if (data.toLowerCase().includes("error")) {
+                serverEvents.emit("errMessage", data);
+            }
+
             serverEvents.emit("on");
         });
 
