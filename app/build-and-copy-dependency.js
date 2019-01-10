@@ -91,7 +91,7 @@ function findAllInstances(src, dest, send) {
                     return;
                 }
 
-                recurse(path.join(dir, dirName, "/node_modules/@nui"));
+                recurse(path.join(dir, dirName, "/node_modules/@nui"), i);
             });    
         }
         
@@ -109,12 +109,13 @@ function copy(src, destinationDirectories, send) {
     return new Promise((resolve) => {
         const transformsParent = fs.readdirSync(path.join(src, "/.nui"))[0];
 
-        destinationDirectories.forEach((destination, i) => {
+        destinationDirectories.forEach((destinations, i) => {
             const sourceDirectory = path.join(src, "/.nui", transformsParent, "/transforms", SRC_DIRECTORIES[i]);
 
-            send(`copying ${sourceDirectory} to ${destination}`);
-
-            exec(`rsync --archive --progress --quiet --exclude=node_modules ${sourceDirectory}/* ${destination}`);
+            destinations.forEach((destination) => {
+                send(`copying ${sourceDirectory} to ${destination}\n\n`);                
+                exec(`rsync --archive --progress --quiet --exclude=node_modules ${sourceDirectory}/* ${destination}`);
+            });
         });
 
         resolve();
