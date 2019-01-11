@@ -29,6 +29,10 @@
 
 3. Now that you have added your nui repos and the platform repo, you can copy your local code over to the platform by clicking "build & copy -> build & start" next to on of your repos OR select multiple repos and click the "Build & Copy selected" button above your list of repos. You'll be able to see the commands running in the terminal on the right of your page or in your terminal locally.
 
+---
+
+The "Check to copy dependencies to root @nui dir of each..." checkbox is there to copy over your nui components to the root of each experience's nui dependencies. The purpose of this is if you're developing an unpublished, new component that doesn't currently exist on the platform this will copy it over to the root, and the dependency will be resolved even though it wasn't previously installed or published.
+
 
 ## Contributing to Booey
 

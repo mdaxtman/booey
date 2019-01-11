@@ -31,9 +31,9 @@ const PLATFORM_PATHS = [
     platformPathTemplate`control-mobile-production-es5`
 ];
 
-function buildAndCopyDependency(src, dest, send) {
+function buildAndCopyDependency(src, dest, copyToRoot = false, send) {
     return build(src, send)
-        .then(findAllInstances.bind(null, src, dest, send))
+        .then(findAllInstances.bind(null, src, dest, copyToRoot, send))
         .then((destinationDirectories) => (
             copy(src, destinationDirectories, send)
         ))
@@ -64,12 +64,12 @@ function build(src, send) {
     });
 }
 
-function findAllInstances(src, dest, send) {
+function findAllInstances(src, dest, copyToRoot, send) {
     return new Promise((resolve) => {
         const dependencyName = path.basename(src);
         send(`finding all instances of ${dependencyName} in platform`);
 
-        const destinationDirectories = [];
+        const destinationDirectories = copyToRoot ? PLATFORM_PATHS.map(exp => [path.join(dest, exp, dependencyName)]): [];
 
         function recurse(dir, i) {
             let directories;

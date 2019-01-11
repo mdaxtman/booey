@@ -22,6 +22,7 @@ class ListItem extends React.PureComponent {
                 document.title = "Pending..."
 
                 ws.send({
+                    copyToRoot: this.props.copyToRoot,
                     dependencyPath: this.props.dependencyPath,
                     platformPath: this.props.platformDirectoryPath
                 });
@@ -54,4 +55,8 @@ class ListItem extends React.PureComponent {
     }
 } 
 
-export default connect()(ListItem);
+const mapStateToProps = (state) => ({
+    copyToRoot: state.shouldCopyDependenciesToRoot
+});
+
+export default connect(mapStateToProps)(ListItem);
