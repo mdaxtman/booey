@@ -33,3 +33,12 @@ export function updateStdOutHistoryAction(str) {
         payload: str
     };
 }
+
+export const SET_DEPENDENCY_ROOT_COPY = "SET_DEPENDENCY_ROOT_COPY";
+
+export function setDependencyRootCopy(value) {
+    return {
+        type: SET_DEPENDENCY_ROOT_COPY,
+        payload: value
+    }
+}

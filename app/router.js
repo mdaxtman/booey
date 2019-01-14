@@ -63,6 +63,7 @@ router.ws("/build-dependency", (ws) => {
         buildAndCopyDependency(
             message.dependencyPath,
             message.platformPath,
+            message.copyToRoot,
             ws.send.bind(ws)
         ).then(() => {
             ws.close(1000);
