@@ -15,6 +15,7 @@
   "devDependencies": {
     "@babel/core": "^7.2.0",
     "@babel/plugin-proposal-class-properties": "^7.2.1",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/preset-env": "^7.2.0",
     "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.4",
@@ -32,13 +33,14 @@
     "webpack-hot-middleware": "^2.24.3"
   },
   "dependencies": {
+    "ansi-to-html": "^0.6.9",
     "body-parser": "^1.18.3",
     "classnames": "^2.2.6",
     "express": "^4.16.4",
     "express-ws": "^4.0.0",
     "lodash": "^4.17.11",
     "proptypes": "^1.1.0",
-    "react": "^16.6.3",
+    "react": "^16.7.0",
     "react-dom": "^16.6.3",
     "react-redux": "^5.1.1",
     "redux": "^4.0.1",

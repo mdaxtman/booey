@@ -1,5 +1,7 @@
 import React from "react";
 import {connect} from "react-redux";
+import Convert from "ansi-to-html";
+const convert = new Convert();
 
 class Output extends React.PureComponent {
     constructor(props) {
@@ -28,10 +30,12 @@ class Output extends React.PureComponent {
                 className={className}
                 ref={this.outputElement}
             >
-                {stdOut.map((line, i) => (
-                    <div key={i}>
-                        {line}
-                    </div>
+                {stdOut.map((line, i) => console.log(line) || (
+                    <div
+                        key={i}
+                        // for some reason this ansi character is not being converted.
+                        dangerouslySetInnerHTML={{ __html: convert.toHtml(line.replace(/(\?)?25l/g, "\n"))}}
+                    />
                 ))}
             </div>
         );

@@ -23,12 +23,12 @@ const SRC_DIRECTORIES = [
 const PLATFORM_PATHS = [
     platformPathTemplate`control-mobile-debug`,
     platformPathTemplate`control-desktop-debug`,
-    platformPathTemplate`control-desktop-debug-es5`,
-    platformPathTemplate`control-mobile-debug-es5`,
-    platformPathTemplate`control-desktop-production`,
-    platformPathTemplate`control-desktop-production-es5`,
-    platformPathTemplate`control-mobile-production`,
-    platformPathTemplate`control-mobile-production-es5`
+    // platformPathTemplate`control-desktop-debug-es5`,
+    // platformPathTemplate`control-mobile-debug-es5`,
+    // platformPathTemplate`control-desktop-production`,
+    // platformPathTemplate`control-desktop-production-es5`,
+    // platformPathTemplate`control-mobile-production`,
+    // platformPathTemplate`control-mobile-production-es5`
 ];
 
 function buildAndCopyDependency(src, dest, copyToRoot = false, send) {
@@ -47,7 +47,7 @@ function buildAndCopyDependency(src, dest, copyToRoot = false, send) {
 
 function build(src, send) {
     return new Promise((resolve, reject) => {
-        const build = exec("rm -rf .nui && nui build", { cwd: src });
+        const build = exec("nui build", {cwd: src});
 
         build.stdout.on("data", (data) => {
             send(data);
@@ -72,8 +72,11 @@ function findAllInstances(src, dest, copyToRoot, send) {
         const destinationDirectories = copyToRoot ? PLATFORM_PATHS.map(exp => [path.join(dest, exp, dependencyName)]): [];
 
         function recurse(dir, i) {
+            if (!destinationDirectories[i]) {
+                destinationDirectories[i] = [];
+            }
+            
             let directories;
-
             try {
                 directories = fs.readdirSync(dir);
             } catch(e) {
@@ -81,12 +84,13 @@ function findAllInstances(src, dest, copyToRoot, send) {
             }
 
             directories.forEach((dirName) => {
-                if (dirName === dependencyName) {
-                    if (!destinationDirectories[i]) {
-                        destinationDirectories[i] = [];
-                    }
+                if (dirName.startsWith(dependencyName)) {
+                    const currentDestination = path.join(dir, dependencyName);
+                    const currentExperience = destinationDirectories[i];
 
-                    destinationDirectories[i].push(path.join(dir, dependencyName));
+                    if (!currentExperience.includes(currentDestination)) {
+                        currentExperience.push(currentDestination);
+                    }
 
                     return;
                 }
@@ -107,18 +111,26 @@ function findAllInstances(src, dest, copyToRoot, send) {
 function copy(src, destinationDirectories, send) {
 
     return new Promise((resolve) => {
-        const transformsParent = fs.readdirSync(path.join(src, "/.nui"))[0];
+        destinationDirectories.forEach((destinations, i, arr) => {
+            const sourceDirectory = path.join(src, "/.nui/transforms/es5-debug");
 
-        destinationDirectories.forEach((destinations, i) => {
-            const sourceDirectory = path.join(src, "/.nui", transformsParent, "/transforms", SRC_DIRECTORIES[i]);
-
-            destinations.forEach((destination) => {
+            destinations.forEach((destination, j) => {
                 send(`copying ${sourceDirectory} to ${destination}\n\n`);                
-                exec(`rsync --archive --progress --quiet --exclude=node_modules ${sourceDirectory}/* ${destination}`);
+                const copyBuild = exec(`rsync --archive --progress --quiet ${sourceDirectory}/* ${destination}`);
+
+                copyBuild.on("close", () => {
+                    const copyDep = exec(`rsync --archive --progress --quiet ${path.join(src, "/.nui/node_modules/*")} ${path.join(destination, "node_modules")}`)
+
+                    copyDep.on("close", () => {
+                        // this is a naive assumption that the previous ones were already completed.
+                        if (i === destinationDirectories.length - 1 && j === destinations.length -1) {
+                            resolve();
+                        }
+                    });
+                });
             });
         });
 
-        resolve();
     });
 }
 
