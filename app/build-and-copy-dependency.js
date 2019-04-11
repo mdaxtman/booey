@@ -31,6 +31,8 @@ const PLATFORM_PATHS = [
     // platformPathTemplate`control-mobile-production-es5`
 ];
 
+const TRANSFORMED_SUFFIX = ".es5-debug";
+
 function buildAndCopyDependency(src, dest, copyToRoot = false, send) {
     return build(src, send)
         .then(findAllInstances.bind(null, src, dest, copyToRoot, send))
@@ -47,6 +49,7 @@ function buildAndCopyDependency(src, dest, copyToRoot = false, send) {
 
 function build(src, send) {
     return new Promise((resolve, reject) => {
+        // const build = exec("nui build --type production", {cwd: src});
         const build = exec("nui build", {cwd: src});
 
         build.stdout.on("data", (data) => {
@@ -84,19 +87,23 @@ function findAllInstances(src, dest, copyToRoot, send) {
             }
 
             directories.forEach((dirName) => {
-                if (dirName.startsWith(dependencyName)) {
-                    const currentDestination = path.join(dir, dependencyName);
-                    const currentExperience = destinationDirectories[i];
+                let currentDestinationFolder;
 
-                    if (!currentExperience.includes(currentDestination)) {
-                        currentExperience.push(currentDestination);
-                    }
-
-                    return;
+                if (dirName === dependencyName) {
+                    currentDestinationFolder = dependencyName
+                } else if (dirName === (dependencyName + TRANSFORMED_SUFFIX)) {
+                    currentDestinationFolder = dependencyName + TRANSFORMED_SUFFIX;
+                } else {
+                    return recurse(path.join(dir, dirName, "/node_modules/@nui"), i);
                 }
 
-                recurse(path.join(dir, dirName, "/node_modules/@nui"), i);
-            });    
+                const currentDestinationPath = path.join(dir, currentDestinationFolder);
+                const currentExperience = destinationDirectories[i];
+
+                if (!currentExperience.includes(currentDestinationPath)) {
+                    currentExperience.push(currentDestinationPath);
+                }
+            });
         }
         
         PLATFORM_PATHS.forEach((platformPath, i) => {
@@ -119,7 +126,7 @@ function copy(src, destinationDirectories, send) {
                 const copyBuild = exec(`rsync --archive --progress --quiet ${sourceDirectory}/* ${destination}`);
 
                 copyBuild.on("close", () => {
-                    const copyDep = exec(`rsync --archive --progress --quiet ${path.join(src, "/.nui/node_modules/*")} ${path.join(destination, "node_modules")}`)
+                    const copyDep = exec(`rsync --archive --progress --quiet ${path.join(src, "/.nui/node_modules/@nui/*")} ${path.join(destination, "node_modules/@nui")}`)
 
                     copyDep.on("close", () => {
                         // this is a naive assumption that the previous ones were already completed.

@@ -36,3 +36,5 @@ app.listen(port, function () {
 
     console.log(`server listening on port ${port}\n`);
 });
+
+process.on("warning", e => console.warn(e.stack));

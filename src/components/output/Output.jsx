@@ -1,6 +1,7 @@
-import React from "react";
 import {connect} from "react-redux";
+import {defer} from "lodash";
 import Convert from "ansi-to-html";
+import React from "react";
 const convert = new Convert();
 
 class Output extends React.PureComponent {
@@ -12,8 +13,10 @@ class Output extends React.PureComponent {
 
     componentDidUpdate(prevProps) {
         if (prevProps.stdOut.length < this.props.stdOut.length) {
-            const output = this.outputElement.current;
-            output.scrollTop = output.scrollHeight - output.clientHeight;
+            defer(() => {
+                const output = this.outputElement.current;
+                output.scrollTop = output.scrollHeight - output.clientHeight;
+            });
         }
     }
 
@@ -30,7 +33,7 @@ class Output extends React.PureComponent {
                 className={className}
                 ref={this.outputElement}
             >
-                {stdOut.map((line, i) => console.log(line) || (
+                {stdOut.map((line, i) => (
                     <div
                         key={i}
                         // for some reason this ansi character is not being converted.

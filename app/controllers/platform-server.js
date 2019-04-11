@@ -6,6 +6,7 @@ const serverEvents = new EventEmitter();
 
 class PlatformServer {
     startServer(dest) {
+        console.log("start server");
         this.killServer();
 
         this.platformServer = exec("node dist --environment=development", { cwd: dest });
